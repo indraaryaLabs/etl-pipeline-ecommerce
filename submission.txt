@@ -1,0 +1,12 @@
+# Menjalankan skrip
+python main.py
+
+# Menjalankan unit test pada folder tests
+python -m pytest tests
+
+# Menjalankan test coverage pada folder tests
+coverage run -m pytest tests
+coverage report -m
+
+# Url Google Sheets:
+(Kosongkan jika Anda memutuskan hanya menggunakan CSV)
