@@ -1,42 +1,36 @@
-# Python ETL Pipeline for E-Commerce Data
+# E-commerce ETL Pipeline
 
-## 📌 Deskripsi Proyek
-Proyek ini adalah implementasi **ETL (Extract, Transform, Load) Pipeline** otomatis menggunakan Python. Program ini dirancang untuk melakukan *web scraping* data produk dari situs e-commerce (Fashion Studio), membersihkan dan mentransformasi data mentah tersebut agar siap dianalisis, lalu menyimpannya ke dalam format CSV. 
+A small Python ETL pipeline that scrapes product listings from a demo fashion store, cleans them with pandas, and writes an analysis-ready CSV. Built as the final submission for a Dicoding data-processing course.
 
-Proyek ini mendemonstrasikan kemampuan pengumpulan data dari web, manipulasi data menggunakan Pandas, dan penulisan kode modular yang terstruktur.
+## What it does
 
-## ⚙️ Alur Kerja Pipeline (ETL Process)
-1. **Extract:** Mengambil data mentah HTML dari target URL (`https://fashion-studio.dicoding.dev/`) menggunakan library `requests` dan `BeautifulSoup4`. Pipeline ini dikonfigurasi untuk memproses hingga 50 halaman sekaligus.
-2. **Transform:** Memproses data mentah menggunakan `Pandas` dengan langkah-langkah:
-   - Menghapus data kosong (Null) dan duplikat.
-   - Menyaring data yang tidak valid (misal: "Unknown Product" atau "Not Rated").
-   - Membersihkan format string (menghapus teks berlebih pada kolom Size, Gender, dan Colors).
-   - Mengonversi format harga ($) menjadi tipe data numerik dan mengonversinya ke mata uang IDR.
-3. **Load:** Mengekspor data yang telah bersih dan terstruktur ke dalam file `products.csv`.
+1. **Extract** — fetches 50 catalogue pages from `https://fashion-studio.dicoding.dev/` with `requests` + BeautifulSoup, with a 1-second delay between pages so the server isn't hammered.
+2. **Transform** — drops nulls and duplicates, removes invalid rows (`Unknown Product`, unrated items), strips label text from the size/gender/colors fields, converts USD prices to numbers and then to IDR (fixed rate of 16,000), and adds a scrape timestamp.
+3. **Load** — saves the cleaned table to `products.csv` (867 products in the last run).
 
-## 🛠️ Teknologi & Library
-- **Bahasa Pemrograman:** Python 3
-- **Web Scraping:** `requests`, `beautifulsoup4`
-- **Data Manipulation:** `pandas`
-- **Unit Testing:** `pytest`, `pytest-cov`
+Each step lives in its own module under `utils/` and has unit tests under `tests/`.
 
-## 🚀 Cara Menjalankan Proyek Secara Lokal
+## Run it
 
-**1. Clone Repository:**
-\`\`\`bash
-git clone https://github.com/indraarya77/etl-pipeline-ecommerce.git
-cd etl-pipeline-ecommerce
-\`\`\`
-
-**2. Instalasi Dependencies:**
-Pastikan kamu memiliki Python yang terinstal, lalu jalankan perintah ini untuk menginstal semua library yang dibutuhkan:
-\`\`\`bash
+```bash
+python -m venv .venv && source .venv/bin/activate   # Windows: .venv\Scripts\activate
 pip install -r requirements.txt
-\`\`\`
-
-**3. Jalankan Pipeline:**
-Eksekusi file utama untuk memulai proses ETL:
-\`\`\`bash
 python main.py
-\`\`\`
-Setelah proses selesai, akan muncul pesan `--- ETL Pipeline Selesai dengan Sukses ---` dan file `products.csv` akan otomatis dibuat di dalam folder proyek.
+```
+
+## Tests
+
+```bash
+python -m pytest tests
+coverage run -m pytest tests && coverage report -m
+```
+
+## Structure
+
+```
+main.py             # runs extract -> transform -> load
+utils/extract.py    # scraping and page parsing
+utils/transform.py  # cleaning and type conversion
+utils/load.py       # CSV export
+tests/              # unit tests for each step
+```
