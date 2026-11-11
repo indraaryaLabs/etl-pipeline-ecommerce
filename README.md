@@ -1,36 +1,68 @@
-# E-commerce ETL Pipeline
+# etl-pipeline-ecommerce
 
-A small Python ETL pipeline that scrapes product listings from a demo fashion store, cleans them with pandas, and writes an analysis-ready CSV. Built as the final submission for a Dicoding data-processing course.
+A Python ETL pipeline that scrapes a demo fashion e-commerce catalog, cleans and standardizes the data with pandas, and loads it into an analysis-ready destination. Built as the final submission for a Dicoding data-processing course — and structured like a production pipeline: one module per stage, with unit tests for each.
 
-## What it does
+## ✨ Features
 
-1. **Extract** — fetches 50 catalogue pages from `https://fashion-studio.dicoding.dev/` with `requests` + BeautifulSoup, with a 1-second delay between pages so the server isn't hammered, and stamps each record with the scrape time.
-2. **Transform** — drops nulls and duplicates, removes invalid rows (`Unknown Product`, unrated items), strips label text from the size/gender/colors fields, converts USD prices to numbers and then to IDR (fixed rate of 16,000).
-3. **Load** — saves the cleaned table to `products.csv` (867 products in the last run).
+- **Extract** — fetches 50 catalog pages from the demo store with `requests` + BeautifulSoup, pacing requests with a delay between pages and stamping every record with its scrape timestamp
+- **Transform** — cleans the raw scrape with pandas: drops nulls and duplicates, removes invalid rows (`Unknown Product`, unrated items), strips label text from size/gender/color fields, and converts USD prices to numeric IDR values
+- **Load** — writes the clean dataset to `products.csv` by default, with additional ready-made loaders for **PostgreSQL** (`sqlalchemy` + `psycopg2`) and **Google Sheets** (service-account credentials via the Google API client)
+- **Tested** — pytest unit tests cover each stage (`extract`, `transform`, `load`) and can be run with coverage reporting
 
-Each step lives in its own module under `utils/` and has unit tests under `tests/`.
+## 🏗️ Project structure
 
-## Run it
+```
+.
+├── main.py               # pipeline entry point: extract → transform → load
+├── utils/
+│   ├── extract.py        # page fetching and HTML parsing
+│   ├── transform.py      # cleaning, validation, and type conversion
+│   └── load.py           # CSV / PostgreSQL / Google Sheets loaders
+├── tests/
+│   ├── test_extract.py
+│   ├── test_transform.py
+│   └── test_load.py
+├── products.csv          # output from the last pipeline run
+├── requirements.txt
+└── submission.txt        # course submission notes
+```
+
+## 🛠️ Tech stack
+
+| Stage | Technology |
+| --- | --- |
+| Extract | requests, beautifulsoup4 |
+| Transform | pandas |
+| Load | CSV, sqlalchemy + psycopg2 (PostgreSQL), google-api-python-client (Sheets) |
+| Testing | pytest, pytest-cov / coverage |
+
+## 🚀 Getting started
+
+**Prerequisites:** Python 3.10+
 
 ```bash
-python -m venv .venv && source .venv/bin/activate   # Windows: .venv\Scripts\activate
+git clone https://github.com/indraaryaLabs/etl-pipeline-ecommerce.git
+cd etl-pipeline-ecommerce
+
+python -m venv .venv
+source .venv/bin/activate        # Windows: .venv\Scripts\activate
+
 pip install -r requirements.txt
 python main.py
 ```
 
-## Tests
+The default run performs extract → transform → load and writes **`products.csv`** in the project root. By default the pipeline stops at CSV — PostgreSQL and Google Sheets loaders are available in `utils/load.py` if you want a database or spreadsheet destination (Google Sheets requires a `google-sheets-api.json` service-account key).
+
+## 🧪 Testing
 
 ```bash
 python -m pytest tests
-coverage run -m pytest tests && coverage report -m
+
+# with coverage
+coverage run -m pytest tests
+coverage report -m
 ```
 
-## Structure
+## 📄 License
 
-```
-main.py             # runs extract -> transform -> load
-utils/extract.py    # scraping and page parsing
-utils/transform.py  # cleaning and type conversion
-utils/load.py       # CSV export
-tests/              # unit tests for each step
-```
+Released under the [MIT License](LICENSE).
